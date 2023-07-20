@@ -10,8 +10,6 @@ class Blocker : ImageComponent(Playground) {
     val speed = 0.0007f
 
     init {
-        Playground.addComponent(this)
-
         image = Playground.picmap
         index = 10
         count = 100

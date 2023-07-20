@@ -1,21 +1,23 @@
 package com.koje.brickgame.core
 
+import com.koje.brickgame.core.boards.Board
 import com.koje.brickgame.core.stones.Stone
 import com.koje.framework.graphics.ImageComponent
 import com.koje.framework.graphics.Position
 import kotlin.math.sin
 
-class Marble : ImageComponent(Playground) {
+class Marble(board: Board) : ImageComponent(Playground) {
 
     val vector = Position()
-    val position = Playground.marbleSource.position.copy()
+    val position = board.marbleSource.position.copy()
     val positionOld = Position()
     var size = 0f
     var speed = 0.002f
     var flying = true
     var height = 0f
+    var type = nextType
 
-    var buildSpeed = 2.2f
+    var buildSpeed = 0.2f
 
     private var state: () -> Unit = {
         if (size < 0.07f) {
@@ -26,14 +28,16 @@ class Marble : ImageComponent(Playground) {
     }
 
     private val starting = {
-        if (Playground.marbleSource.creation == this) {
-            Playground.marbleSource.creation = null
+        if (board.marbleSource.creation == this) {
+            board.marbleSource.creation = null
         }
 
-        vector.x = Playground.target.position.x - position.x
-        vector.y = Playground.target.position.y - position.y
+        vector.x = board.target.position.x - position.x
+        vector.y = board.target.position.y - position.y
         state = moving
     }
+
+    var stoneCheck=0
 
     private var moving = {
         positionOld.copyFrom(position)
@@ -54,9 +58,12 @@ class Marble : ImageComponent(Playground) {
         }
 
         // kollision mit blocker
-        if (positionOld.y > 0.48f && position.y <= 0.48f && Playground.blocker.blocked(position.x)) {
+        if (positionOld.y > 0.48f && position.y <= 0.48f && board.blocker.blocked(position.x)) {
             vector.y *= -1
             movingY()
+
+            vector.x -= 0.5f * (board.blocker.position.x - position.x)
+            movingX()
         }
 
         // ausgang nach unten
@@ -72,7 +79,7 @@ class Marble : ImageComponent(Playground) {
 
         // flughöhe berechnen
         if (flying) {
-            height = 0.05f * sin((position.y - Playground.marbleSource.position.y) * 360f / 0.75f)
+            height = 0.05f * sin((position.y - board.marbleSource.position.y) * 360f / 0.75f)
             if (height < 0f) {
                 flying = false
                 height = 0f
@@ -80,8 +87,14 @@ class Marble : ImageComponent(Playground) {
         }
 
 
-        Playground.currentBoard.stones.forEach {
-            it.checkCollision(this)
+        stoneCheck++
+        if(stoneCheck>0) {
+            Playground.currentBoard.stones.components.forEach {
+                if (it is Stone) {
+                    it.checkCollision(this)
+                }
+            }
+            stoneCheck = 0
         }
     }
 
@@ -94,11 +107,22 @@ class Marble : ImageComponent(Playground) {
         position.y += vector.y * Playground.loopTime * speed
     }
 
+
     init {
-        Playground.currentBoard.addComponent(this)
+        nextType = when (nextType) {
+            Names.Red -> Names.Green
+            Names.Green -> Names.Blue
+            else -> Names.Red
+        }
+
+        board.addComponent(this)
 
         image = Playground.picmap
-        index = 3
+        index = when (type) {
+            Names.Red -> 3
+            Names.Green -> 4
+            else -> 5
+        }
         count = 100
         plane = 3
 
@@ -114,19 +138,23 @@ class Marble : ImageComponent(Playground) {
         }
     }
 
-    fun passedX(value:Float):Boolean{
-        if(positionOld.x<value && position.x>=value) return true
-        if(positionOld.x>value && position.x<=value) return true
+    fun passedX(value: Float): Boolean {
+        if (positionOld.x < value && position.x >= value) return true
+        if (positionOld.x > value && position.x <= value) return true
         return false
     }
 
-    fun passedY(value:Float):Boolean{
-        if(positionOld.y<value && position.y>=value) return true
-        if(positionOld.y>value && position.y<=value) return true
+    fun passedY(value: Float): Boolean {
+        if (positionOld.y < value && position.y >= value) return true
+        if (positionOld.y > value && position.y <= value) return true
         return false
     }
 
     fun sin(value: Float): Float {
         return sin(Math.toRadians(value.toDouble())).toFloat()
+    }
+
+    companion object {
+        var nextType = Names.Red
     }
 }

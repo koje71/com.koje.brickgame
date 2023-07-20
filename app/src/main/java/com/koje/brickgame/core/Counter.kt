@@ -8,11 +8,12 @@ class Counter(val posX: Float, val posY: Float, val scale: Float) : ComponentGro
 
     class Digit : ImageComponent(Playground) {
         var xPos = 0f
+        var yPos = 0f
     }
 
     var digits = mutableListOf<Digit>()
 
-    fun setValue(intValue: Int) {
+    fun setValue(intValue: Any) {
         var value = "$intValue     "
         var offset = 0f
         for (i in 0..4) {
@@ -21,7 +22,7 @@ class Counter(val posX: Float, val posY: Float, val scale: Float) : ComponentGro
         }
     }
 
-    fun setColor(id:Int){
+    fun setColor(id: Int) {
         for (i in 0..4) {
             digits[i].color = App.instance.getColor(id)
         }
@@ -39,22 +40,29 @@ class Counter(val posX: Float, val posY: Float, val scale: Float) : ComponentGro
             '7' -> 87
             '8' -> 88
             '9' -> 89
+            '-' -> 90
+            ',' -> 91
             else -> 12
         }
     }
 
     fun setOffset(digit: Digit, value: Char, offset: Float): Float {
         digit.xPos = offset
+        digit.yPos = when (value) {
+            ',' -> -0.3f
+            else -> 0f
+        }
         return when (value) {
             '1' -> 0.6f
             '2', '3', '5' -> 0.7f
+            '-' -> 0.45f
+            ',' -> 0.3f
             else -> 0.8f
         }
     }
 
     init {
         plane = 3
-        Playground.addComponent(this)
 
         for (i in 0..4) {
             addDigit()
@@ -72,7 +80,7 @@ class Counter(val posX: Float, val posY: Float, val scale: Float) : ComponentGro
             count = 400
 
             addProcedure {
-                move(xPos, 0f)
+                move(xPos, yPos)
             }
 
             addComponent(this)

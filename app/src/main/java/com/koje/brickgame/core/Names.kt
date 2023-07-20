@@ -2,5 +2,9 @@ package com.koje.brickgame.core
 
 enum class Names {
 
-    None,White
+    Blue,
+    Green,
+    None,
+    Red,
+    White
 }
