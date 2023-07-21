@@ -1,0 +1,9 @@
+Ziel des Projekts: Entwicklung einer Android Spiele App
+Entwicklungsumgebung: Android Studio (2022-2-1)
+Sprache: Kotlin
+Grafik: OpenGL-ES 2
+
+In diesem Projekt geht es um Grafikprogrammierung mit OpenGL-ES 2. Das Package 'framework'
+stellt Basisfunktionen zur Grafikprogrammierung bereit. Diese können auch in anderen Projekten
+wiederverwendet werden. Die eigentliche App zeigt die Anwendung des Frameworks.
+
